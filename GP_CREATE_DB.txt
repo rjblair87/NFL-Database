@@ -1,0 +1,281 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema groupproject
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema groupproject
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `groupprojectFinal` ;
+-- -----------------------------------------------------
+-- Schema GroupProject
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema GroupProject
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `GroupProjectFinal` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `groupprojectFinal` ;
+USE `GroupProjectFinal` ;
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Commissioner`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Commissioner` (
+  `CommissionerID` INT NOT NULL,
+  `fName` VARCHAR(45) NULL DEFAULT NULL,
+  `lName` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`CommissionerID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Team`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Team` (
+  `Name` VARCHAR(20) NOT NULL,
+  `Conference` VARCHAR(20) NULL DEFAULT NULL,
+  `Division` VARCHAR(20) NULL DEFAULT NULL,
+  `OwnerID` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Owner`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Owner` (
+  `OwnerID` INT NOT NULL,
+  `fName` VARCHAR(45) NULL DEFAULT NULL,
+  `lName` VARCHAR(45) NULL DEFAULT NULL,
+  `Team` VARCHAR(45) NULL DEFAULT NULL,
+  `CommissID` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`OwnerID`),
+  INDEX `OwnerComm_idx` (`CommissID` ASC) VISIBLE,
+  INDEX `OwnerTeam_idx` (`Team` ASC) VISIBLE,
+  CONSTRAINT `OwnerComm`
+    FOREIGN KEY (`CommissID`)
+    REFERENCES `GroupProjectFinal`.`Commissioner` (`CommissionerID`),
+  CONSTRAINT `OwnerTeam`
+    FOREIGN KEY (`Team`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Coaches`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Coaches` (
+  `CoachID` INT NOT NULL,
+  `fName` VARCHAR(45) NULL DEFAULT NULL,
+  `lName` VARCHAR(45) NULL DEFAULT NULL,
+  `Team` VARCHAR(45) NULL DEFAULT NULL,
+  `OwnerID` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`CoachID`),
+  INDEX `CoachTeam_idx` (`Team` ASC) VISIBLE,
+  INDEX `CoachOwner_idx` (`OwnerID` ASC) VISIBLE,
+  CONSTRAINT `CoachOwner`
+    FOREIGN KEY (`OwnerID`)
+    REFERENCES `GroupProjectFinal`.`Owner` (`OwnerID`),
+  CONSTRAINT `CoachTeam`
+    FOREIGN KEY (`Team`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`DepType`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`DepType` (
+  `DeptNum` INT NOT NULL,
+  `DepType` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`DeptNum`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Player`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Player` (
+  `PlayerID` INT NOT NULL,
+  `fName` VARCHAR(45) NULL DEFAULT NULL,
+  `lName` VARCHAR(45) NULL DEFAULT NULL,
+  `Position` VARCHAR(45) NULL DEFAULT NULL,
+  `Off/Def` VARCHAR(45) NULL DEFAULT NULL,
+  `Team` VARCHAR(45) NULL DEFAULT NULL,
+  `CoachID` INT NULL DEFAULT NULL,
+  `College` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`PlayerID`),
+  INDEX `PlayerCoach_idx` (`CoachID` ASC) VISIBLE,
+  INDEX `PlayerTeam_idx` (`Team` ASC) VISIBLE,
+  CONSTRAINT `PlayerCoach`
+    FOREIGN KEY (`CoachID`)
+    REFERENCES `GroupProjectFinal`.`Coaches` (`CoachID`),
+  CONSTRAINT `PlayerTeam`
+    FOREIGN KEY (`Team`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Record`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Record` (
+  `TeamNum` INT NOT NULL,
+  `Team` VARCHAR(45) NULL DEFAULT NULL,
+  `Wins` INT NULL DEFAULT NULL,
+  `Losses` INT NULL DEFAULT NULL,
+  `Ties` INT NULL DEFAULT NULL,
+  `WinPerc` FLOAT GENERATED ALWAYS AS (((`Wins` + (0.5 * `Ties`)) / ((`Wins` + `Losses`) + `Ties`))) VIRTUAL,
+  PRIMARY KEY (`TeamNum`),
+  INDEX `RecordTeam_idx` (`Team` ASC) VISIBLE,
+  CONSTRAINT `RecordTeam`
+    FOREIGN KEY (`Team`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Staff`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Staff` (
+  `StaffID` INT NOT NULL,
+  `fName` VARCHAR(45) NULL DEFAULT NULL,
+  `lName` VARCHAR(45) NULL DEFAULT NULL,
+  `DeptNum` INT NULL DEFAULT NULL,
+  `Team` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`StaffID`),
+  INDEX `StaffTeam_idx` (`Team` ASC) VISIBLE,
+  INDEX `StaffDepT_idx` (`DeptNum` ASC) VISIBLE,
+  CONSTRAINT `StaffDepT`
+    FOREIGN KEY (`DeptNum`)
+    REFERENCES `GroupProjectFinal`.`DepType` (`DeptNum`),
+  CONSTRAINT `StaffTeam`
+    FOREIGN KEY (`Team`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `GroupProject`.`Tlocation`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GroupProjectFinal`.`Tlocation` (
+  `City` VARCHAR(20) NOT NULL,
+  `State` VARCHAR(20) NULL DEFAULT NULL,
+  `tName` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`City`, `tName`),
+  INDEX `TLocTeam_idx` (`tName` ASC) VISIBLE,
+  CONSTRAINT `TLocTeam`
+    FOREIGN KEY (`tName`)
+    REFERENCES `GroupProjectFinal`.`Team` (`Name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+USE `groupprojectFinal` ;
+
+-- -----------------------------------------------------
+-- Placeholder table for view `groupproject`.`depref`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `groupprojectFinal`.`depref` (`fName` INT, `lName` INT, `DepType` INT);
+
+-- -----------------------------------------------------
+-- Placeholder table for view `groupproject`.`ownercoach`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `groupprojectFinal`.`ownercoach` (`Owner fName` INT, `Owner lName` INT, `Coach fName` INT, `Coach lName` INT, `Team` INT);
+
+-- -----------------------------------------------------
+-- View `groupproject`.`depref`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `groupprojectFinal`.`depref`;
+USE `groupprojectFinal`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `groupprojectFinal`.`depref` AS select `groupprojectFinal`.`staff`.`fName` AS `fName`,`groupprojectFinal`.`staff`.`lName` AS `lName`,`groupprojectFinal`.`deptype`.`DepType` AS `DepType` from (`groupprojectFinal`.`staff` join `groupprojectFinal`.`deptype` on((`groupprojectFinal`.`staff`.`DeptNum` = `groupprojectFinal`.`deptype`.`DeptNum`)));
+
+-- -----------------------------------------------------
+-- View `groupproject`.`ownercoach`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `groupprojectFinal`.`ownercoach`;
+USE `groupprojectFinal`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `groupprojectFinal`.`ownercoach` AS select `groupprojectFinal`.`owner`.`fName` AS `Owner fName`,`groupprojectFinal`.`owner`.`lName` AS `Owner lName`,`groupprojectFinal`.`coaches`.`fName` AS `Coach fName`,`groupprojectFinal`.`coaches`.`lName` AS `Coach lName`,`groupprojectFinal`.`coaches`.`Team` AS `Team` from (`groupprojectFinal`.`coaches` join `groupprojectFinal`.`owner` on((`groupprojectFinal`.`coaches`.`OwnerID` = `groupprojectFinal`.`owner`.`OwnerID`)));
+USE `GroupProjectFinal` ;
+
+-- -----------------------------------------------------
+-- procedure College
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `College`(collegeName varchar(20))
+BEGIN
+SELECT
+fName, lName, Position, Team
+FROM
+Player
+WHERE
+College = collegeName;
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure TeamRoster
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TeamRoster`(teamName varchar(20))
+BEGIN
+SELECT
+fName, lName, Position
+FROM
+Player
+WHERE
+Team = teamName;
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure TeamUpdate
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TeamUpdate`(firstn varchar(20),lastn VARCHAR(20),NewTeam VARCHAR(20))
+BEGIN
+UPDATE Player
+SET Team = NewTeam
+WHERE fName = firstn && lName = lastn;
+END$$
+
+DELIMITER ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
