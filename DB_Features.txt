@@ -1,0 +1,80 @@
+Database Model Features
+`WinPerc` FLOAT GENERATED ALWAYS AS (((`Wins` + (0.5 * `Ties`)) / ((`Wins` + `Losses`) + `Ties`))) 
+
+Creates an attribute for the record table to generate the winning percentage of each team.
+
+-- -----------------------------------------------------
+-- View `groupproject`.`depref`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `groupprojectFinal`.`depref`;
+USE `groupprojectFinal`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `groupprojectFinal`.`depref` AS select `groupprojectFinal`.`staff`.`fName` AS `fName`,`groupprojectFinal`.`staff`.`lName` AS `lName`,`groupprojectFinal`.`deptype`.`DepType` AS `DepType` from (`groupprojectFinal`.`staff` join `groupprojectFinal`.`deptype` on((`groupprojectFinal`.`staff`.`DeptNum` = `groupprojectFinal`.`deptype`.`DeptNum`)));
+
+The view ‘depref’ creates a view that displays the staff's first name and last name and the department type that they work for. This is done by a join between the Staff and Deptype Tables where DepNum = DepNum.
+
+-- -----------------------------------------------------
+-- View `groupproject`.`ownercoach`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `groupprojectFinal`.`ownercoach`;
+USE `groupprojectFinal`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `groupprojectFinal`.`ownercoach` AS select `groupprojectFinal`.`owner`.`fName` AS `Owner fName`,`groupprojectFinal`.`owner`.`lName` AS `Owner lName`,`groupprojectFinal`.`coaches`.`fName` AS `Coach fName`,`groupprojectFinal`.`coaches`.`lName` AS `Coach lName`,`groupprojectFinal`.`coaches`.`Team` AS `Team` from (`groupprojectFinal`.`coaches` join `groupprojectFinal`.`owner` on((`groupprojectFinal`.`coaches`.`OwnerID` = `groupprojectFinal`.`owner`.`OwnerID`)));
+USE `GroupProjectFinal` ;
+
+The view ‘ownercoach’ displays the first and last name of the owner and the first and last name of the coach of the corresponding team. The team's name is also displayed. This is done by a join between the Owner and Coaches table where OwnerID = OwnerID.
+-- -----------------------------------------------------
+-- procedure College
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `College`(collegeName varchar(20))
+BEGIN
+SELECT
+fName, lName, Position, Team
+FROM
+Player
+WHERE
+College = collegeName;
+
+END$$
+DELIMITER ;
+
+The procedure College displays the first name, last name, position and team of the players that went to a certain college. The college is determined by the user. 
+
+-- -----------------------------------------------------
+-- procedure TeamRoster
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TeamRoster`(teamName varchar(20))
+BEGIN
+SELECT
+fName, lName, Position
+FROM
+Player
+WHERE
+Team = teamName;
+
+END$$
+DELIMITER ;
+
+The procedure TeamRoster returns the first name, last name and position for a team selected by the user. This allows for the user to view a team's entire roster. 
+
+
+
+-- -----------------------------------------------------
+-- procedure TeamUpdate
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `GroupProjectFinal`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TeamUpdate`(firstn varchar(20),lastn VARCHAR(20),NewTeam VARCHAR(20))
+BEGIN
+UPDATE Player
+SET Team = NewTeam
+WHERE fName = firstn && lName = lastn;
+END$$
+DELIMITER ;
+
+The procedure TeamUdate allows the user to update a player's team by entering their first and last name followed by the name of the new team. This is necessary since players are constantly being traded or moving to new teams. 
